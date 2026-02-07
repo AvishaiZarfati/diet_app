@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בניית תפריט | חלי ממן</title>
+    <!-- Bootstrap 4 RTL -->
+    <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.5.3/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <!-- Select2 CSS (For searchable dropdowns) -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 Bootstrap 4 Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+
+    <style>
+        :root {
+            --color-primary: #33a7b5; /* Teal/Cyan from logo */
+            --color-secondary: #f78da7; /* Pink */
+            --color-text: #666;
+            --color-bg-light: #f4f4f4;
+            --color-header: #33a7b5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-bg-light);
+            color: var(--color-text);
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--color-header);
+            color: white;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .user-avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .header-icons span {
+            font-size: 1.2rem;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+
+        /* Personal Info Box */
+        .personal-info-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: -30px; /* Overlap header */
+            position: relative;
+            z-index: 10;
+        }
+
+        .info-stat {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .info-stat h3 {
+            margin: 0;
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+        .info-stat span {
+            font-size: 0.9rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            border-bottom: 1px solid #eee;
+        }
+        .sidebar li a {
+            display: block;
+            padding: 10px 5px;
+            color: var(--color-text);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .sidebar li a:hover, .sidebar li.active a {
+            color: var(--color-primary);
+            font-weight: bold;
+            border-right: 3px solid var(--color-primary);
+        }
+
+        /* Wizard Content */
+        .wizard-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            min-height: 600px;
+        }
+
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .step-header {
+            color: var(--color-primary);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+        }
+
+        .meal-category-group {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .meal-category-title {
+            font-weight: bold;
+            color: var(--color-secondary);
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+        .btn-primary:hover {
+            background-color: #2a8c99;
+            border-color: #2a8c99;
+        }
+        
+        .sensitivity-tag {
+            display: inline-block;
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 2px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .sensitivity-tag.active {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        /* Summary Step Styles */
+        .meal-summary-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .meal-summary-header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        .meal-summary-body {
+            padding: 15px;
+            background-color: #fff;
+        }
+        .summary-item {
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Select2 Custom Styles */
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+            padding-right: 12px;
+            color: #495057;
+            text-align: right;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+            left: 1px;
+            right: auto;
+        }
+        .select2-search__field {
+            direction: rtl;
+        }
+        .select2-results__option {
+            text-align: right;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Footer */
+        .app-badges img {
+            height: 40px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <h4 class="mb-0 font-weight-bold">חלי ממן</h4>
+            </div>
+            <div class="col-md-9 text-left d-flex justify-content-end align-items-center">
+                <div class="user-avatar ml-3">
+                    <img src="menu webpage_files/avatar.png" alt="User">
+                    <span class="mr-2 font-weight-bold">אבישי צרפתי</span>
+                </div>
+                <div class="header-icons border-right pr-3 mr-3">
+                    <i class="fas fa-headset" title="תמיכה"></i>
+                    <span class="text-white text-decoration-none mr-1" style="font-size: 1rem;">ליווי ותמיכה</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container mb-5">
+    <!-- Personal Info Section -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-10">
+            <div class="personal-info-box">
+                <div class="row align-items-center">
+                    <div class="col-md-4 border-left">
+                        <h6 class="font-weight-bold">פרופיל אישי</h6>
+                        <p class="mb-0">אבישי צרפתי</p>
+                        <small class="text-muted">התאמנו את התכנים במיוחד בשבילך</small>
+                    </div>
+                    <div class="col-md-5 border-left">
+                        <h6 class="font-weight-bold mb-3">מדדים אישיים</h6>
+                        <div class="d-flex justify-content-around">
+                            <div class="info-stat">
+                                <h3>165</h3>
+                                <span>גובה</span>
+                            </div>
+                            <div class="info-stat">
+                                <h3>34.16</h3>
+                                <span>BMI</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <a href="#" class="btn btn-outline-info btn-sm btn-block mb-2">לפרופיל שלי</a>
+                        <a href="#" class="text-muted small">התנתק</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#">איזור אישי</a></li>
+                    <li><a href="#">על השיטה שלי</a></li>
+                    <li><a href="#">כל השלבים</a></li>
+                    <li class="active"><a href="#">בניית תפריט</a></li>
+                    <li><a href="#">חלי VOD</a></li>
+                    <li><a href="#">מתכונים</a></li>
+                    <li><a href="#">הכירו את הצוות</a></li>
+                    <li><a href="#">הפרופיל שלי</a></li>
+                    <li><a href="#">יומן אכילה</a></li>
+                </ul>
+                <div class="mt-4 text-center app-badges">
+                    <img src="menu webpage_files/icon_android.png" alt="Android">
+                    <img src="menu webpage_files/icon_apple.png" alt="iOS">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="wizard-container">
+                
+                <!-- Step 1: Config -->
+                <div id="step-1" class="step-content active">
+                    <h4 class="step-header">1. הגדרות תפריט</h4>
+                    <div class="form-group">
+                        <label>שם התפריט:</label>
+                        <input type="text" class="form-control" value="3 ארוחות בסיסי 1800 קלוריות" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>קלוריות:</label>
+                        <input type="text" class="form-control" value="1800" readonly>
+                    </div>
+                    <div class="text-left mt-4">
+                        <button type="button" class="btn btn-primary" onclick="goToStep(2)">המשך <i class="fas fa-chevron-left ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Sensitivities -->
+                <div id="step-2" class="step-content">
+                    <h4 class="step-header">2. העדפות מזון / רגישויות</h4>
+                    <p class="text-muted">סמן את העדפות המזון שלך (התפריט לא יסונן אוטומטית בפרוטוטייפ זה)</p>
+                    
+                    <div class="mb-4">
+                        <span class="sensitivity-tag active" onclick="toggleSens(this)">ללא סויה</span>
+                        <span class="sensitivity-tag active" onclick="toggleSens(this)">ללא טופו</span>
+                        <span class="sensitivity-tag" onclick="toggleSens(this)">צמחוני</span>
+                        <span class="sensitivity-tag" onclick="toggleSens(this)">טבעוני</span>
+                        <span class="sensitivity-tag" onclick="toggleSens(this)">ללא גלוטן</span>
+                        <span class="sensitivity-tag" onclick="toggleSens(this)">ללא לקטוז</span>
+                        <span class="sensitivity-tag" onclick="toggleSens(this)">סוכרת</span>
+                        <span class="sensitivity-tag" onclick="toggleSens(this)">ללא דגים</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(1)">חזור</button>
+                        <button type="button" class="btn btn-primary" onclick="goToStep(3)">המשך לארוחת בוקר <i class="fas fa-chevron-left ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Breakfast -->
+                <div id="step-3" class="step-content">
+                    <h4 class="step-header">3. ארוחת בוקר</h4>
+                    <div id="breakfast-form"></div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(2)">חזור</button>
+                        <button type="button" class="btn btn-primary" onclick="goToStep(4)">המשך לארוחת צהריים <i class="fas fa-chevron-left ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Lunch -->
+                <div id="step-4" class="step-content">
+                    <h4 class="step-header">4. ארוחת צהריים</h4>
+                    <div id="lunch-form"></div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(3)">חזור</button>
+                        <button type="button" class="btn btn-primary" onclick="goToStep(5)">המשך לארוחת ערב <i class="fas fa-chevron-left ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Dinner -->
+                <div id="step-5" class="step-content">
+                    <h4 class="step-header">5. ארוחת ערב</h4>
+                    <div id="dinner-form"></div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(4)">חזור</button>
+                        <button type="button" class="btn btn-success" onclick="finishWizard()">הצג תפריט סופי <i class="fas fa-check ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 6: Summary (New) -->
+                <div id="step-6" class="step-content">
+                    <div id="print-area">
+                        <div class="text-center mb-4">
+                            <h3 class="font-weight-bold text-primary">התפריט שלי</h3>
+                            <p class="text-muted">1800 קלוריות | 3 ארוחות</p>
+                        </div>
+                        <div id="menu-summary-content">
+                            <!-- Dynamic Content Here -->
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center mt-4 no-print">
+                        <button type="button" class="btn btn-outline-primary ml-2" onclick="goToStep(5)">ערוך תפריט</button>
+                        <button type="button" class="btn btn-primary" onclick="window.print()">הדפס תפריט <i class="fas fa-print ml-1"></i></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery (Required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    // --- Data ---
+    // Mapping from subs.txt content
+    const foodDatabase = {
+        "חלבון בשר": [
+            "100 גרם חזה עוף/הודו (לפני בישול)",
+            "150 גרם שווארמה הודו",
+            "3 קציצות בקר",
+            "2 שיפודי עוף או פרגית",
+            "3 כדורי בשר עוף או הודו",
+            "150 גרם אנטריקוט דק דק",
+            "110 גרם בקר דל שומן (כתף/פילה מדומה/שייטל)",
+            "1/4 עוף (כרע) בגריל או מבושל (ללא עור)",
+            "3 שוקי עוף (פולקע)",
+            "200 גרם דג לפני בישול (או 150 גרם אפוי)",
+            "1.5 קופסת טונה במים (200 גרם)",
+            "1 קופסת טונה בשמן (מסוננת היטב)",
+            "1 קופסת סרדינים (מסוננת)",
+            "8 כדורי פלאפל אפויים",
+            "10 כדורי פלאפל חלי ממן אפויים",
+            "150 גרם טופו",
+            "60 גרם שבבי סויה יבשים",
+            "1.5 כוס קטניות מבושלות (עדשים/חומוס/שעועית)",
+            "3 כפות חומוס (סלט ביתי/קנוי)",
+            "170 גרם סייטן",
+            "200 גרם פסטרמה לייט (9 פרוסות)",
+            "100 גרם סלמון מעושן",
+            "2 רולים סושי (12-16 יחידות לא מטוגן)",
+            "1 המבורגר צמחי (עד 99 קלוריות)",
+            "3 נקניקיות רגילות (מוגבל לפעם בשבוע)",
+            "3 יחידות כבד עוף (מוגבל לפעם בשבוע)",
+            "200 גרם קורקבנים (כ-10 יחידות)",
+            "130 גרם טחון מן הצומח",
+            "1 כנף עוף (פעם בשבוע)",
+            "שיפוד לבבות (6 יח' - פעם בשבוע)",
+            "160 גרם סלט טונה בשימורים"
+        ],
+        "חלבון גבינה": [
+            "1 כוס חלב 1%",
+            "1 פרוסת גבינה צהובה 9%",
+            "2 פרוסות גבינה צהובה 5%",
+            "60 גרם גבינה בולגרית/צפתית 5%",
+            "1/2 קופסת קוטג'/גבינה לבנה 5% (125 גרם)",
+            "1 גביע מעדן/יוגורט 0%-1.5% (עד 80 קלוריות)",
+            "1 ביצה",
+            "60 גרם טופו",
+            "1/2 קופסת טונה במים",
+            "3 כפות גבינה 5%",
+            "1 כוס חלב סויה ללא סוכר",
+            "1 כוס ריוויון",
+            "40 גרם סלמון מעושן",
+            "1 רול סושי (6-8 יח' לא מטוגן)",
+            "1.5 בורקס פילו (כתחליף לארוחת ערב)",
+            "1 כוס שוקו 0% (פעם בשבוע)",
+            "2 משולשי גבינה מותכת לייט",
+            "1 פרוסת גבינה צהובה 22% (פעם ביום)",
+            "1 אצבע מוצרלה",
+            "1 גביע יוגורט ללא תוספות עד 1.5%",
+            "100 מל משקה יוגורט 1%-3%",
+            "80 גרם דג לפני בישול",
+            "50 גרם סרדינים ללא שמן",
+            "1.5 כף טונה בשמן",
+            "100 מל שמנת סויה לבישול 5%",
+            "6 כפות שמנת לבישול 10%",
+            "5 כפות שמנת לבישול 15%",
+            "6 כפות שמנת חמוצה 9%",
+            "1 פרוסת דג מלוח (30 גרם)",
+            "1 מעדן סויה (100 קל')",
+            "1-2 שלגון חלבי (עד 4 גרם חלבון)",
+            "1 כוס גלידה דיאט 2-5% ללא סוכר"
+        ],
+        "פחמימות": [
+            "1 פיתה קלה (עד 100 קלוריות)",
+            "2 פרוסות לחם קל",
+            "1 פרוסת לחם רגיל/מלא",
+            "1 לחמניה קלה",
+            "1/2 מצה / 1 מצה קלה",
+            "2-3 קרקרים (עד 80 קלוריות)",
+            "3 דפי אורז (גדולים) / 5 קטנים",
+            "3/4 כוס דגני בוקר/ברנפלקס (עד פעם ביום)",
+            "2 כפות שיבולת שועל",
+            "1/2 כוס (אחרי בישול): אורז/פסטה/פתיתים/בורגול/קינואה",
+            "1/2 כוס קטניות מבושלות (חומוס/עדשים/שעועית)",
+            "1 תפוח אדמה בינוני",
+            "1/2 בטטה קטנה",
+            "1 קלח תירס קטן / 3/4 כוס תירס קל",
+            "3 עלי גפן",
+            "1/2 כוס פירה",
+            "1/3 דלורית",
+            "1 כוס נבטוטים",
+            "1 חטיף אנרגיה (עד 100 קלוריות)",
+            "2 עוגיות ללא סוכר",
+            "שקית פופקורן (100 קלוריות)",
+            "1 טורטיה (עד 80 קל')",
+            "1 עלה סיגר",
+            "1 כף שקדי מרק",
+            "2 כפות קמח/סולת/פירורי לחם",
+            "3/4 כוס פצפוצי אורז",
+            "1 כף קרוטונים",
+            "10 פריכיות ביס דבש",
+            "2 כפות גרנולה ללא סוכר",
+            "5 מקלות צ'יפס רגיל",
+            "40 גרם ערמונים",
+            "1/3 דלעת ערמונים/ספגטי",
+            "100 גרם ארטישוק ירושלמי",
+            "1.5 כוס אדממה (תרמילים)",
+            "3/4 כוס אפונה ירוקה"
+        ],
+        "שומנים": [
+            "1 כפית שמן (כל סוג)",
+            "1 כף טחינה מוכנה",
+            "1 כפית טחינה גולמית",
+            "2 אגוזי מלך",
+            "7 שקדים",
+            "10 בוטנים/פיסטוקים",
+            "6 זיתים קטנים / 2 גדולים",
+            "1 כף מיונז קל / 1 כפית רגיל",
+            "1/4 אבוקדו בינוני / 2 כפות אבוקדו",
+            "1 כף גרעיני חמניה/דלעת",
+            "1 כף צנובר",
+            "1 כפית חמאה",
+            "1 כף סלט חומוס קנוי",
+            "2 כפות שמנת חמוצה 15%",
+            "4 כפות שמנת חמוצה 9%",
+            "1 כף זרעי פשתן/צ'יה",
+            "1 כף קוקוס/קמח שקדים",
+            "100 מל נוזל קוקוס",
+            "1 כף זעתר",
+            "3 פקאנים",
+            "4 קשיו / 3 מקדמיה",
+            "5 אגוזי לוז / 2 אגוזי ברזיל",
+            "3 כפות רוטב לייט / 1.5 כף רגיל",
+            "30 גרם ממרח כבד/טונה",
+            "1 כף איקרה",
+            "1 כפית אריסה/פסטו/ממרח זיתים",
+            "1 כף ממרח שומשום/חלווה (פעמיים בשבוע)",
+            "1 כפית ממרח בוטנים",
+            "1 כף סלט חצילים במיונז",
+            "1 כפית ממרח שקדים",
+            "1 כפית ממרח שוקולד (פעמיים בשבוע)"
+        ],
+        "פירות": [
+            "1 גויאבה בינונית",
+            "1 תפוח עץ בינוני",
+            "1 אגס בינוני",
+            "1 תפוז",
+            "2 קלמנטינות",
+            "1 אפרסק",
+            "1 נקטרינה",
+            "1/2 אשכולית",
+            "1 בננה קטנה",
+            "12 ענבים",
+            "1 כוס קוביות אבטיח (200 גרם)",
+            "1.5 כוס קוביות מלון",
+            "2 שזיפים",
+            "2 משמשים",
+            "1 מנגו קטן (או 1/2 רגיל)",
+            "1 כוס דובדבנים/תותים/פירות יער",
+            "1/3 פומלה",
+            "2 קיווי",
+            "1 כוס פאפאיה טרייה",
+            "2 תאנים טריות / 1 יבשה",
+            "2 תמר לח / 1 תמר מג'הול",
+            "2 משמש מיובש / 2 שזיף מיובש",
+            "1 כף צימוקים/חמוציות",
+            "2 יח' פיג'ויה",
+            "1 אנונה קטנה",
+            "2 יח' פיטאיה",
+            "120 גרם אננס טרי / 2 יח' יבש",
+            "1 כוס פירות יער/אוכמניות/פיטנגו",
+            "4 פסיפלורה",
+            "1 אפרסמון קטן",
+            "2 קרמבולה",
+            "1/3 רימון",
+            "1/2 כוס רסק תפוחים (ללא סוכר)",
+            "2 כפות גוג'י ברי",
+            "2 שורש זנגביל",
+            "1 חבוש קטן",
+            "4 שסק",
+            "2 חרוב",
+            "1/3 כוס לפתן ללא סוכר",
+            "7 ליצ'י טרי / 4 משומר",
+            "20 גרם פרי מיובש (תות/מנגו/אננס)",
+            "6 תפוז סיני"
+        ],
+        "ירקות": [
+            "מלפפון", "עגבניה/שרי", "פלפל (כל הצבעים)", "חסה/עלים", "גזר", "כרוב/כרובית",
+            "ברוקולי", "קישוא", "חציל", "שעועית ירוקה/צהובה", "פטריות", "בצל/שום",
+            "קולורבי/צנון/לפת", "סלרי/שומר", "תרד", "אספרגוס", "במיה", "דלעת", "חילבה",
+            "ארטישוק/לבבות דקל", "כרישה", "לוביה ירוקה טרייה", "נבטים", "תירס גמדי",
+            "חמוצים (1 ביום)", "סלק (1 ביום)"
+        ]
+    };
+
+    // Schema derived from 1800 Calorie Plan
+    const mealSchema = {
+        breakfast: [
+            { category: "פחמימות", label: "מנת פחמימות", count: 2 },
+            { category: "חלבון גבינה", label: "מנת חלבון (גבינה)", count: 3 },
+            { category: "פירות", label: "מנת פרי", count: 1 },
+            { category: "ירקות", label: "מנת ירקות", count: 1 },
+            { category: "שומנים", label: "מנת שומן", count: 2 }
+        ],
+        lunch: [
+            { category: "פחמימות", label: "מנת פחמימות", count: 2 },
+            { category: "חלבון בשר", label: "מנת חלבון (בשר)", count: 2 },
+            { category: "פירות", label: "מנת פרי", count: 1 },
+            { category: "ירקות", label: "מנת ירקות", count: 2 },
+            { category: "שומנים", label: "מנת שומן", count: 2 }
+        ],
+        dinner: [
+            { category: "פחמימות", label: "מנת פחמימות", count: 2 },
+            { category: "חלבון גבינה", label: "מנת חלבון (גבינה)", count: 2 },
+            { category: "פירות", label: "מנת פרי", count: 1 },
+            { category: "ירקות", label: "מנת ירקות", count: 1 },
+            { category: "שומנים", label: "מנת שומן", count: 2 }
+        ]
+    };
+
+    // --- Logic ---
+
+    function renderMeal(targetId, schemaKey) {
+        const container = document.getElementById(targetId);
+        container.innerHTML = "";
+        
+        const schema = mealSchema[schemaKey];
+        
+        schema.forEach(group => {
+            const groupDiv = document.createElement("div");
+            groupDiv.className = "meal-category-group";
+            
+            const title = document.createElement("div");
+            title.className = "meal-category-title";
+            title.innerText = group.label + (group.count > 1 ? ` (${group.count} מנות)` : "");
+            groupDiv.appendChild(title);
+
+            for (let i = 0; i < group.count; i++) {
+                const select = document.createElement("select");
+                select.className = "form-control mb-2 meal-select";
+                select.setAttribute('data-category', group.label);
+                
+                // Add default option
+                const defaultOption = document.createElement("option");
+                defaultOption.text = "בחר פריט...";
+                defaultOption.value = "";
+                select.add(defaultOption);
+
+                // Populate items
+                const items = foodDatabase[group.category] || [];
+                items.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.text = item;
+                    opt.value = item;
+                    select.add(opt);
+                });
+
+                groupDiv.appendChild(select);
+            }
+            container.appendChild(groupDiv);
+        });
+        
+        // Initialize Select2 on the newly created selects
+        $('.meal-select').select2({
+            dir: "rtl",
+            width: '100%',
+            placeholder: "חפש או בחר פריט..."
+        });
+    }
+
+    function goToStep(stepNumber) {
+        // Hide all steps
+        document.querySelectorAll('.step-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        // Show target step
+        document.getElementById('step-' + stepNumber).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function toggleSens(el) {
+        el.classList.toggle('active');
+    }
+
+    function finishWizard() {
+        const summaryContainer = document.getElementById('menu-summary-content');
+        summaryContainer.innerHTML = '';
+
+        const mealTitles = {
+            'breakfast-form': 'ארוחת בוקר',
+            'lunch-form': 'ארוחת צהריים',
+            'dinner-form': 'ארוחת ערב'
+        };
+
+        const formIds = ['breakfast-form', 'lunch-form', 'dinner-form'];
+
+        formIds.forEach(formId => {
+            const formContainer = document.getElementById(formId);
+            const selects = formContainer.querySelectorAll('select');
+            
+            let hasSelection = false;
+            let mealHtml = `
+                <div class="meal-summary-card">
+                    <div class="meal-summary-header">
+                        ${mealTitles[formId]}
+                    </div>
+                    <div class="meal-summary-body">
+            `;
+
+            selects.forEach(select => {
+                if (select.value) {
+                    hasSelection = true;
+                    mealHtml += `
+                        <div class="summary-item">
+                            <i class="fas fa-check text-success ml-2"></i>
+                            <strong>${select.getAttribute('data-category')}:</strong> ${select.value}
+                        </div>
+                    `;
+                }
+            });
+
+            if (!hasSelection) {
+                mealHtml += `<div class="text-muted font-italic">לא נבחרו פריטים</div>`;
+            }
+
+            mealHtml += `</div></div>`;
+            summaryContainer.innerHTML += mealHtml;
+        });
+
+        goToStep(6);
+    }
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMeal("breakfast-form", "breakfast");
+        renderMeal("lunch-form", "lunch");
+        renderMeal("dinner-form", "dinner");
+    });
+
+</script>
+</body>
+</html>
